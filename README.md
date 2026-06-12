@@ -44,6 +44,21 @@ docker exec -u 1000 git-backup /usr/local/bin/backup.sh
 | `RUN_ON_STARTUP` | `true` | Run one backup immediately when the container starts. |
 | `GIT_TIMEOUT` | `300` | Seconds to wait per git operation. |
 
+## Workflow
+
+**Adding repos:** Clone them by hand into `REPOS_HOST_PATH`. The service picks them up on the next run — no restart needed.
+
+```bash
+git clone https://github.com/example/repo /path/to/your/repos/repo
+```
+
+**Repo groups:** If you have a directory containing multiple repos (e.g. you cloned a whole GitHub organisation manually), add the directory name to `REPO_GROUPS` in `.env`. The service will recurse one level into it.
+
+**When Uptime Kuma sends a failure ping:**
+1. Check `docker logs git-backup` for the `ERROR:` or `SKIP:` line.
+2. If the remote was taken down and you no longer need updates, add the repo name to `IGNORE_REPOS` in `.env` and redeploy (`docker compose up -d`). The error will stop.
+3. If it is a transient network issue or a `git pull` conflict, investigate and resolve manually — the next scheduled run will retry.
+
 ## Logs
 
 All output goes to Docker's log stream — no files written inside the container.
