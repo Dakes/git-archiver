@@ -10,6 +10,9 @@ set -euo pipefail
 : "${IGNORE_REPOS:=}"
 : "${IGNORE_FILE:=}"
 : "${REPO_GROUPS:=}"
+: "${GITHUB_SOURCES:=}"
+: "${GITHUB_SKIP_FORKS:=true}"
+: "${GITHUB_SKIP_ARCHIVED:=false}"
 
 log() {
     echo "[$(date '+%Y-%m-%dT%H:%M:%S%z')] entrypoint: $*" >&2
@@ -48,6 +51,9 @@ CRONTAB_FILE="/etc/crontabs/$USER_NAME"
     echo "IGNORE_REPOS=${IGNORE_REPOS}"
     echo "IGNORE_FILE=${IGNORE_FILE}"
     echo "REPO_GROUPS=${REPO_GROUPS}"
+    echo "GITHUB_SOURCES=${GITHUB_SOURCES}"
+    echo "GITHUB_SKIP_FORKS=${GITHUB_SKIP_FORKS}"
+    echo "GITHUB_SKIP_ARCHIVED=${GITHUB_SKIP_ARCHIVED}"
     # Redirect to PID 1's stdout so output appears in `docker logs`.
     echo "${CRON_SCHEDULE} /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1"
 } > "$CRONTAB_FILE"

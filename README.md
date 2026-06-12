@@ -39,6 +39,9 @@ docker exec -u 1000 git-backup /usr/local/bin/backup.sh
 | `IGNORE_REPOS` | `""` | Comma-separated list of repo directory names to ignore entirely. |
 | `IGNORE_FILE` | `<REPOS_DIR>/.git-backup-ignore` | Path to a file with one repo name per line (`#` comments allowed). |
 | `REPO_GROUPS` | `""` | Comma-separated directory names that contain repos instead of being repos themselves. Each is recursed one level deep. |
+| `GITHUB_SOURCES` | `""` | Comma-separated GitHub org/user names to auto-clone and keep updated. Each gets its own subdirectory. |
+| `GITHUB_SKIP_FORKS` | `true` | Skip forked repositories when syncing GitHub sources. |
+| `GITHUB_SKIP_ARCHIVED` | `false` | Skip archived repositories when syncing GitHub sources. |
 | `PUID` / `PGID` | `1000` / `1000` | User/Group IDs used for git operations. Must match the host owner of `REPOS_HOST_PATH`. |
 | `TZ` | — | Timezone for the cron schedule, e.g. `Europe/Berlin`. |
 | `RUN_ON_STARTUP` | `true` | Run one backup immediately when the container starts. |
@@ -53,6 +56,8 @@ git clone https://github.com/example/repo /path/to/your/repos/repo
 ```
 
 **Repo groups:** If you have a directory containing multiple repos (e.g. you cloned a whole GitHub organisation manually), add the directory name to `REPO_GROUPS` in `.env`. The service will recurse one level into it.
+
+**GitHub sources:** Set `GITHUB_SOURCES=some-org,some-user` in `.env` and redeploy. The service will create a subdirectory for each source, clone all public non-fork repos, and keep them updated on every run. New repos added to the org/user are picked up automatically. `IGNORE_REPOS` still applies to individual repos inside a source.
 
 **When Uptime Kuma sends a failure ping:**
 1. Check `docker logs git-backup` for the `ERROR:` or `SKIP:` line.
