@@ -58,7 +58,10 @@ main() {
     for repo in "${REPOS_DIR}"/*/; do
         [[ -d "$repo" ]] || continue
         repo_name=$(basename "$repo")
-        if is_github_source "$repo_name"; then
+        if is_ignored "$repo_name"; then
+            log "IGNORED: ${repo_name}"
+            continue
+        elif is_github_source "$repo_name"; then
             continue  # managed by GitHub sync below
         elif is_group "$repo_name"; then
             log "GROUP: ${repo_name}"
