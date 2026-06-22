@@ -40,8 +40,10 @@ else
     USER_NAME=$(getent passwd "$PUID" | cut -d: -f1)
 fi
 
-# Install crontab for the runtime user.
-CRONTAB_FILE="/etc/crontabs/$USER_NAME"
+# Install the crontab under root so the redirect to /proc/1/fd/1 (owned by root/PID 1)
+# succeeds. The job drops to the runtime user via `su` before running backup.sh,
+# matching the same pattern used for the startup run below.
+CRONTAB_FILE="/etc/crontabs/root"
 {
     echo "SHELL=/bin/bash"
     echo "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -54,8 +56,7 @@ CRONTAB_FILE="/etc/crontabs/$USER_NAME"
     echo "GITHUB_SOURCES=${GITHUB_SOURCES}"
     echo "GITHUB_SKIP_FORKS=${GITHUB_SKIP_FORKS}"
     echo "GITHUB_SKIP_ARCHIVED=${GITHUB_SKIP_ARCHIVED}"
-    # Redirect to PID 1's stdout so output appears in `docker logs`.
-    echo "${CRON_SCHEDULE} /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1"
+    echo "${CRON_SCHEDULE} su -s /bin/bash ${USER_NAME} -c '/usr/local/bin/backup.sh' >> /proc/1/fd/1 2>&1"
 } > "$CRONTAB_FILE"
 chmod 600 "$CRONTAB_FILE"
 
